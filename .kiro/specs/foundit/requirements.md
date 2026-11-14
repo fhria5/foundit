@@ -15,14 +15,16 @@ Spec-driven requirements. No app code exists yet; this file is the contract the 
 
 ## REQ-3 — Claim workflow (state machine)
 
-- States: reported → matched → claimed → verifying → returned / rejected → archived.
+- States: reported → matched → claimed → verifying → holding (24 h) → returned / rejected / contested → archived.
 - Every transition records actor + timestamp in the audit log.
-- A claim requires answering 3 proof-of-ownership questions set by the reporter.
+- A claim requires answering 3 proof-of-ownership questions set by the reporter AND attaching photo proof (a photo of a similar item or a receipt).
+- A claim is never auto-approved; the finder decides.
 
 ## REQ-4 — Proof verification
 
 - The finder approves or rejects a claim with one tap; rejection requires a reason.
-- Approved claims move to handover; handover is recorded and the item is archived.
+- An approved claim enters a 24-hour holding window (see REQ-9) before handover.
+- Handover requires a handover photo (see REQ-10); only then is the item archived as returned.
 
 ## REQ-5 — Moderation
 
@@ -44,3 +46,15 @@ Spec-driven requirements. No app code exists yet; this file is the contract the 
 
 - Scores are shown as computed, never as certainty ("likely match", not "this is your item").
 - No chat, no payments, no real-time GPS tracking, no official ID verification.
+
+## REQ-9 — Contest window (24 h)
+
+- During the 24-hour holding window, any other user can contest the claim with their own proof.
+- A contest returns the claim to verifying; the finder re-decides with both proofs visible.
+- If nobody contests within 24 hours, the claim proceeds to handover.
+
+## REQ-10 — Handover proof
+
+- Handover is recorded with a photo (item + claimant) and timestamp.
+- An item cannot reach the returned state without a handover photo.
+- False claims lower the claimant's trust score (see REQ-5); repeated false claims hold the account from new claims.
